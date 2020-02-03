@@ -1,9 +1,3 @@
-# onepassword-python
-Python wrapper for the 1password CLI
-
-## Usage
-
-```python
 from onepassword import OnePassword
 
 secret = {"password": "<YOUR-PASSWORD-HERE>",
@@ -17,8 +11,3 @@ pem_keys = (doc for doc in documents if doc["overview"]["title"].endswith("pem")
 first_key = next(pem_keys)
 key_contents = op.get("document", first_key["uuid"])
 print(key_contents)
-```
-
-## API
-
-### onepassword.OnePassword
