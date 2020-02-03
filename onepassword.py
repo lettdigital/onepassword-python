@@ -71,7 +71,7 @@ class OnePassword(object):
             error_message = str(e)
             if "multiple items found" in error_message:
                 multiple_uuids = []
-                rg = re.compile(f"for the item {item_name} in vault {vault}: (.*)")
+                rg = re.compile(f"\s*for the item {item_name} in vault {vault}: (.*)")
                 for line in error_message.split("\n"):
                     match = rg.match(line)
                     if match:
