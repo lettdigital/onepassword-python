@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 from uuid import uuid4
+import re
 
 
 class DeletionFailure(Exception):
@@ -66,6 +67,17 @@ class OnePassword(object):
             run_op_command_in_shell(op_command)
         except subprocess.CalledProcessError:
             raise DeletionFailure(item_name, vault)
+        except UnknownError as e:
+            error_message = str(e)
+            if "multiple items found" in error_message:
+                multiple_uuids = []
+                rg = re.compile(f"for the item {item_name} in vault {vault}: (.*)")
+                for line in error_message.split("\n"):
+                    match = rg.match(line)
+                    if match:
+                        multiple_uuids.append(match.group(1))
+
+                return multiple_uuids
         return "ok"
 
     def get(self, resource, item_name):
@@ -101,13 +113,14 @@ def run_op_command_in_shell(op_command):
                              env=os.environ)
     try:
         process.check_returncode()
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         error_messages = ["not currently signed in",
                           "Authentication required"]
-        if any(msg in process.stderr.decode("UTF-8") for msg in error_messages):
+        full_error_message = process.stderr.decode("UTF-8")
+        if any(msg in full_error_message for msg in error_messages):
             raise Unauthorized()
         else:
-            raise UnknownError(e)
+            raise UnknownError(full_error_message)
 
     return process.stdout.decode("UTF-8").strip()
 
