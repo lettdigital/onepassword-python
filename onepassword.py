@@ -77,7 +77,7 @@ class OnePassword(object):
                     if match:
                         multiple_uuids.append(match.group(1))
 
-                return multiple_uuids
+                return {"multiple_uuids": multiple_uuids}
         return "ok"
 
     def get(self, resource, item_name):
