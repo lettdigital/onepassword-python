@@ -1,9 +1,15 @@
 [tool.poetry]
 name = "onepassword"
-version = "0.1.0"
+version = "0.1.2"
 description = "Python wrapper for the 1password CLI"
+
+repository = "https://github.com/lettdigital/onepassword-python"
+homepage = "https://github.com/lettdigital/onepassword-python"
+
 authors = ["Gabriel Chamon Araujo <gchamon@live.com>"]
 license = "MIT"
+
+readme = 'README.md'
 
 [tool.poetry.dependencies]
 python = "^3.6"
