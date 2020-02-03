@@ -78,6 +78,8 @@ class OnePassword(object):
                         multiple_uuids.append(match.group(1))
 
                 return {"multiple_uuids": multiple_uuids}
+            if "no item found" in error_message:
+                return "not found"
         return "ok"
 
     def get(self, resource, item_name):
