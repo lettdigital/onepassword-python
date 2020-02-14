@@ -1,8 +1,8 @@
 import json
 import os
+import re
 import subprocess
 from uuid import uuid4
-import re
 
 
 class DeletionFailure(Exception):
@@ -61,8 +61,46 @@ class OnePassword(object):
         op_command = f"{self.op} create document {filename} --title='{title}' --vault='{vault}' --session={self.session_token}"
         return json.loads(run_op_command_in_shell(op_command))
 
-    def delete_item(self, item_name, vault):
-        op_command = f"{self.op} delete item {item_name} --vault='{vault}' --session={self.session_token}"
+    def create_login(self, username, password, title, vault=None, url=None):
+        login_template = {
+            "fields": [
+                {
+                    "value": username,
+                    "name": "username",
+                    "type": "T",
+                    "designation": "username"
+                },
+                {
+                    "value": password,
+                    "name": "password",
+                    "type": "P",
+                    "designation": "password"
+                }
+            ]
+        }
+        encoded_item = json.dumps(login_template, separators=(',', ':'))
+
+        return self.create_item(category="login",
+                                encoded_item=encoded_item,
+                                title=title,
+                                vault=vault,
+                                url=url)
+
+    def create_item(self, category, encoded_item, title, vault=None, url=None):
+        vault_flag = get_optional_flag(vault=vault)
+        url_flag = get_optional_flag(url=url)
+
+        command = f"""
+            {self.op} create item {category} '{encoded_item}' \
+            --title='{title}' \
+            --session={self.session_token} \
+            {vault_flag} {url_flag}
+        """
+        return run_op_command_in_shell(command)
+
+    def delete_item(self, item_name, vault=None):
+        vault_flag = get_optional_flag(vault=vault)
+        op_command = f"{self.op} delete item {item_name} {vault_flag} --session={self.session_token}"
         try:
             run_op_command_in_shell(op_command)
         except subprocess.CalledProcessError:
@@ -107,7 +145,7 @@ class OnePassword(object):
         return run_op_command_in_shell(f"{self.op} --version")
 
 
-def run_op_command_in_shell(op_command):
+def run_op_command_in_shell(op_command, verbose=False):
     process = subprocess.run(op_command,
                              shell=True,
                              check=False,
@@ -115,7 +153,10 @@ def run_op_command_in_shell(op_command):
                              env=os.environ)
     try:
         process.check_returncode()
-    except subprocess.CalledProcessError:
+    except subprocess.CalledProcessError as e:
+        if verbose:
+            print(process.stderr.decode("UTF-8").strip())
+
         error_messages = ["not currently signed in",
                           "Authentication required"]
         full_error_message = process.stderr.decode("UTF-8")
@@ -127,3 +168,8 @@ def run_op_command_in_shell(op_command):
     return process.stdout.decode("UTF-8").strip()
 
 
+def get_optional_flag(**kwargs):
+    key, value = list(kwargs.items())[0]
+    return (f"--{key}='{value}'"
+            if value
+            else "")
