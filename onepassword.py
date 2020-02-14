@@ -138,7 +138,7 @@ class OnePassword(object):
             )
             process.check_returncode()
             return process.stdout.decode('UTF-8').strip()
-        except subprocess.CalledProcessError as e:
+        except subprocess.CalledProcessError:
             raise SigninFailure(f"Error signing in: '{process.stderr.decode('UTF-8').strip()}'")
 
     def get_version(self):
@@ -153,7 +153,7 @@ def run_op_command_in_shell(op_command, verbose=False):
                              env=os.environ)
     try:
         process.check_returncode()
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         if verbose:
             print(process.stderr.decode("UTF-8").strip())
 
