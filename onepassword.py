@@ -96,7 +96,7 @@ class OnePassword(object):
             --session={self.session_token} \
             {vault_flag} {url_flag}
         """
-        return run_op_command_in_shell(command)
+        return json.loads(run_op_command_in_shell(command))
 
     def delete_item(self, item_name, vault=None):
         vault_flag = get_optional_flag(vault=vault)
@@ -123,7 +123,7 @@ class OnePassword(object):
     def get(self, resource, item_name):
         op_command = f"{self.op} get {resource} '{item_name}' --session={self.session_token}"
         try:
-            return run_op_command_in_shell(op_command)
+            return json.loads(run_op_command_in_shell(op_command))
         except subprocess.CalledProcessError:
             raise UnknownResourceItem(f"{resource}: {item_name}")
 
