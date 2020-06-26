@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "onepassword"
-version = "0.4.0"
+version = "0.4.1"
 description = "Python wrapper for the 1password CLI"
 
 repository = "https://github.com/lettdigital/onepassword-python"
