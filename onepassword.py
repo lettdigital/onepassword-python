@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 import re
@@ -129,6 +130,8 @@ class OnePassword(object):
 
     def get_access_token(self, secret, shorthand):
         try:
+            if not os.environ.get("OP_DEVICE"):
+                os.environ["OP_DEVICE"] = base64.b32encode(os.urandom(16)).decode().lower().rstrip("=")
             process = subprocess.run(
                 (f"echo '{secret['password']}' | "
                  f"{self.op} signin {secret['signin_address']} {secret['username']} {secret['secret_key']} "
