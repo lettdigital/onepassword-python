@@ -134,7 +134,8 @@ class OnePassword(object):
                  f"{self.op} signin {secret['signin_address']} {secret['username']} {secret['secret_key']} "
                  f"--output=raw --shorthand={shorthand}"),
                 shell=True,
-                capture_output=True
+                capture_output=True,
+                env=os.environ
             )
             process.check_returncode()
             return process.stdout.decode('UTF-8').strip()
